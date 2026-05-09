@@ -32,7 +32,7 @@ class MainMenu(CTk):
         title.columnconfigure(1, weight=0)
         title.columnconfigure(2, weight=1)
         CTkLabel(title, text="4RunnerExplorer", font=("Arial", 25, "bold")).grid(row=0, column=1, padx=10, pady=10)
-        CTkButton(title, text="🔄", width=12, font=("Arial", 20), command=self.refresh_drives).grid(row=0, column=2, sticky="w", padx=10, pady=10)
+        CTkButton(title, text="↻", width=12, font=("Arial", 20), command=self.refresh_drives).grid(row=0, column=2, sticky="w", padx=10, pady=10)
         CTkButton(title, text="X", width=12, font=("Arial", 20), command=self.destroy).grid(row=0, column=2, sticky="e", padx=10, pady=10)
         title.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
