@@ -35,7 +35,7 @@ class FileExplorer(CTkScrollableFrame):
 
         # creates widgets
         frame = CTkFrame(frame, fg_color=self.cget("fg_color"))
-        state = CTkLabel(frame, text="⯈", font=("Arial", 15))
+        state = CTkLabel(frame, text="▶", font=("Arial", 15))
         name = CTkLabel(frame, text=f" {item_type}{path.drive if path.name == '' else path.name}", font=("Arial", 15))
 
         # binds functionality
@@ -88,7 +88,7 @@ class FileExplorer(CTkScrollableFrame):
         self.expanded_paths.add(volume)
         expanded = CTkFrame(frame, fg_color=self.cget("fg_color"))
         expanded.pack(side="left", fill="x", expand=True)
-        label.configure(text="⯆")
+        label.configure(text="▼")
         label.unbind("<Button-1>")
         label.bind("<Button-1>", lambda e: self.collapse_volume(volume, frame, label, expanded))
         for item in sorted(volume.iterdir(), key=lambda p: (p.is_file(), p.name.lower())):
@@ -113,6 +113,6 @@ class FileExplorer(CTkScrollableFrame):
 
         self.expanded_paths.remove(volume)
         expanded.destroy()
-        label.configure(text="⯈")
+        label.configure(text="▶")
         label.unbind("<Button-1>")
         label.bind("<Button-1>", lambda e: self.expand_volume(volume, frame, label))
