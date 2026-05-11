@@ -14,7 +14,7 @@ class FileInspector(CTkFrame):
         """
 
         # creates fields
-        super(FileInspector, self).__init__(master)
+        super(FileInspector, self).__init__(master, border_width=2)
         self.path = None
         self.pack_propagate(False)
         self.name = StringVar(self, "Name:")

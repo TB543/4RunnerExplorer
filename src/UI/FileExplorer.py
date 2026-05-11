@@ -16,7 +16,7 @@ class FileExplorer(CTkScrollableFrame):
         :param inspector: file inspector widget
         """
 
-        super(FileExplorer, self).__init__(master)
+        super(FileExplorer, self).__init__(master, border_width=2)
         self.expanded_paths = set()
         self.selected = None
         self.drive_manager = drive_manager
