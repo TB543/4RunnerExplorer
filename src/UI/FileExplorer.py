@@ -21,7 +21,6 @@ class FileExplorer(CTkScrollableFrame):
         self.selected = None
         self.drive_manager = drive_manager
         self.inspector = inspector
-        CTkLabel(self, text="File Explorer", font=("Arial", 20, "bold")).pack()
         self.draw()
 
     def draw_item(self, frame, path, item_type):
@@ -58,6 +57,7 @@ class FileExplorer(CTkScrollableFrame):
             widget.destroy()
 
         # draws new file system
+        CTkLabel(self, text="File Explorer", font=("Arial", 20, "bold")).pack()
         for drive in self.drive_manager.mounted_drives:
             self.draw_item(self, Path(drive).resolve(), "💾")
 
