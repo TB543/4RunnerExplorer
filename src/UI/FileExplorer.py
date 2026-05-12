@@ -19,8 +19,10 @@ class FileExplorer(CTkScrollableFrame):
         super(FileExplorer, self).__init__(master, border_width=2)
         self.expanded_paths = set()
         self.selected = None
+        self.after_expand = self.after(0, lambda: None)
         self.drive_manager = drive_manager
         self.inspector = inspector
+        self.inspector.explorer = self
         self.draw()
 
     def draw_item(self, frame, path, item_type):
@@ -33,19 +35,25 @@ class FileExplorer(CTkScrollableFrame):
         """
 
         # creates widgets
-        frame = CTkFrame(frame, fg_color=self.cget("fg_color"))
-        state = CTkLabel(frame, text="▶", font=("Arial", 15))
-        name = CTkLabel(frame, text=f" {item_type}{path.drive if path.name == '' else path.name}", font=("Arial", 15))
+        item = CTkFrame(frame, fg_color=self.cget("fg_color"))
+        item.path = path
+        item.type = item_type
+        state = CTkLabel(item, text="▶", font=("Arial", 15))
+        name = CTkLabel(item, text=f" {item_type}{path.drive if path.name == '' else path.name}", font=("Arial", 15))
 
         # binds functionality
-        state.bind("<Button-1>", lambda e: self.expand_volume(path, frame, state))
-        name.bind("<Button-1>", lambda e: self.select_item(frame, path, item_type == "💾"))
+        state.bind("<Button-1>", lambda e: self.expand_volume(item))
+        name.bind("<Button-1>", lambda e: self.select_item(item))
+
+        # adds metadata for volumes
+        if item_type != "📄":
+            item.state = state
+            state.pack(side="left", anchor="n")
 
         # places widgets
-        if item_type != "📄": state.pack(side="left", anchor="n")
         name.pack(anchor="w")
-        frame.pack(fill="x", expand=True, padx=5, ipady=2)
-        if path in self.expanded_paths: self.expand_volume(path, frame, state)
+        item.pack(fill="x", expand=True, padx=5, ipady=2)
+        if path in self.expanded_paths: self.expand_volume(item)
 
     def draw(self):
         """
@@ -61,37 +69,33 @@ class FileExplorer(CTkScrollableFrame):
         for drive in self.drive_manager.mounted_drives:
             self.draw_item(self, Path(drive).resolve(), "💾")
 
-    def select_item(self, frame, path, drive):
+    def select_item(self, item):
         """
         handles when the user selects an item
 
-        :param frame: widget to highlight when selected
-        :param path: the path of the item
-        :param drive: determines if the item is a drive or not
+        :param item: widget to highlight when selected
         """
 
         if self.selected: self.selected.configure(fg_color=self.cget("fg_color"))
-        self.selected = frame
-        frame.configure(fg_color=ThemeManager.theme["CTkFrame"]["top_fg_color"])
-        self.inspector.select_item(path, drive)
+        self.selected = item
+        self.selected.configure(fg_color=ThemeManager.theme["CTkFrame"]["top_fg_color"])
+        self.inspector.select_item(item.path, item.type == "💾")
 
-    def expand_volume(self, volume, frame, label):
+    def expand_volume(self, volume):
         """
         opens a volume and displays all the files and folders in it
 
         :param volume: volume to expand
-        :param frame: frame used to display the volume
-        :param label: label used to display the volume state (⯈ or ⯆)
         """
 
         # expands the volume
-        self.expanded_paths.add(volume)
-        expanded = CTkFrame(frame, fg_color=self.cget("fg_color"))
+        self.expanded_paths.add(volume.path)
+        expanded = CTkFrame(volume, fg_color=self.cget("fg_color"))
         expanded.pack(side="left", fill="x", expand=True)
-        label.configure(text="▼")
-        label.unbind("<Button-1>")
-        label.bind("<Button-1>", lambda e: self.collapse_volume(volume, frame, label, expanded))
-        for item in sorted(volume.iterdir(), key=lambda p: (p.is_file(), p.name.lower())):
+        volume.state.configure(text="▼")
+        volume.state.unbind("<Button-1>")
+        volume.state.bind("<Button-1>", lambda e: self.collapse_volume(volume, expanded))
+        for item in sorted(volume.path.iterdir(), key=lambda p: (p.is_file(), p.name.lower())):
 
             # handles when folders are found
             if item.is_dir():
@@ -101,18 +105,59 @@ class FileExplorer(CTkScrollableFrame):
             elif item.is_file():
                 self.draw_item(expanded, item, "📄")
 
-    def collapse_volume(self, volume, frame, label, expanded):
+    def collapse_volume(self, volume, expanded):
         """
         collapses all the files and folders in a volume
 
         :param volume: volume to collapse
-        :param frame: frame used to display the volume
-        :param label: label used to display the volume state (⯈ or ⯆)
         :param expanded: the frame containing the expanded volume
         """
 
-        self.expanded_paths.remove(volume)
+        self.expanded_paths.remove(volume.path)
         expanded.destroy()
-        label.configure(text="▶")
-        label.unbind("<Button-1>")
-        label.bind("<Button-1>", lambda e: self.expand_volume(volume, frame, label))
+        volume.state.configure(text="▶")
+        volume.state.unbind("<Button-1>")
+        volume.state.bind("<Button-1>", lambda e: self.expand_volume(volume))
+
+    def highlight_volume(self, event):
+        """
+        highlights the folder at the given mouse position
+
+        :param event: the mouse event
+        """
+
+        def check_pos(widget):
+            """
+            recursively checks each widget's bbox to find which the mouse is hovering over
+
+            :param widget: the widget to check
+
+            :return: the "deepest" widget that mouse is hovering over, or None if mouse is not over any widgets
+            """
+
+            # gets bbox
+            x1 = widget.winfo_rootx()
+            y1 = widget.winfo_rooty()
+            x2 = x1 + widget.winfo_width()
+            y2 = y1 + widget.winfo_height()
+
+            # recursively checks children if this widget is hovered over
+            if x1 <= event.x_root <= x2 and y1 <= event.y_root <= y2:
+                for child in widget.winfo_children():
+                    if result := check_pos(child):
+                        return result
+                return widget
+            return None
+
+        # gets the highest hovered frame for a volume
+        hover = check_pos(self)
+        while not (hover is None or hasattr(hover, "state")):
+            hover = hover.master
+
+        # highlights the volume frame that is hovered over
+        if hover and hover != self.selected:
+            if self.selected: self.selected.configure(fg_color=self.cget("fg_color"))
+            self.selected = hover
+            self.selected.configure(fg_color=ThemeManager.theme["CTkFrame"]["top_fg_color"])
+            self.after_cancel(self.after_expand)
+            self.after_expand = self.after(1000, lambda: self.expand_volume(hover) if hover.path not in self.expanded_paths else None)

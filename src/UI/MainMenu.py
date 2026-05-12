@@ -2,6 +2,7 @@ from customtkinter import CTk, CTkFrame, CTkLabel, CTkButton, set_default_color_
 from Managers.DriveManager import DriveManager
 from UI.FileExplorer import FileExplorer
 from UI.FileInspector import FileInspector
+from UI.ConfirmationFrame import ConfirmationFrame
 
 
 class MainMenu(CTk):
@@ -37,9 +38,11 @@ class MainMenu(CTk):
         title.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
         # places file management tool widgets
-        inspector = FileInspector(self)
+        confirmation = ConfirmationFrame(self)
+        inspector = FileInspector(self, self.drive_manager, confirmation)
         self.explorer = FileExplorer(self, self.drive_manager, inspector)
         self.explorer.grid(row=1, column=0, sticky="nsew")
+        confirmation.lift()
         inspector.grid(row=1, column=1, sticky="nsew")
 
     def refresh_drives(self):
