@@ -49,6 +49,9 @@ class FileExplorer(CTkScrollableFrame):
         if item_type != "📄":
             item.state = state
             state.pack(side="left", anchor="n")
+        if self.selected and self.selected.path == path:
+            item.configure(fg_color=ThemeManager.theme["CTkFrame"]["top_fg_color"])
+            self.selected = item
 
         # places widgets
         name.pack(anchor="w")
@@ -76,7 +79,7 @@ class FileExplorer(CTkScrollableFrame):
         :param item: widget to highlight when selected
         """
 
-        if self.selected: self.selected.configure(fg_color=self.cget("fg_color"))
+        if self.selected and self.selected.winfo_exists(): self.selected.configure(fg_color=self.cget("fg_color"))
         self.selected = item
         self.selected.configure(fg_color=ThemeManager.theme["CTkFrame"]["top_fg_color"])
         self.inspector.select_item(item.path, item.type == "💾")
@@ -90,7 +93,7 @@ class FileExplorer(CTkScrollableFrame):
 
         # expands the volume
         self.expanded_paths.add(volume.path)
-        expanded = CTkFrame(volume, fg_color=self.cget("fg_color"))
+        expanded = CTkFrame(volume, fg_color=self.cget("fg_color"), height=0)
         expanded.pack(side="left", fill="x", expand=True)
         volume.state.configure(text="▼")
         volume.state.unbind("<Button-1>")
@@ -161,3 +164,7 @@ class FileExplorer(CTkScrollableFrame):
             self.selected.configure(fg_color=ThemeManager.theme["CTkFrame"]["top_fg_color"])
             self.after_cancel(self.after_expand)
             self.after_expand = self.after(1000, lambda: self.expand_volume(hover) if hover.path not in self.expanded_paths else None)
+
+        if not hover and self.selected:
+            self.selected.configure(fg_color=self.cget("fg_color"))
+            self.selected = None
