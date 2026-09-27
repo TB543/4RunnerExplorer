@@ -1,5 +1,6 @@
 from customtkinter import CTkScrollableFrame, CTkFrame, CTkLabel, ThemeManager
 from pathlib import Path
+from AppData import MOUNTPOINTS
 
 
 class FileExplorer(CTkScrollableFrame):
@@ -67,8 +68,13 @@ class FileExplorer(CTkScrollableFrame):
         for widget in self.winfo_children():
             widget.destroy()
 
-        # draws new file system
+        # draws mountpoints
         CTkLabel(self, text="File Explorer", font=("Arial", 20, "bold")).pack()
+        for mountpoint in MOUNTPOINTS:
+            self.draw_item(self, Path(mountpoint).expanduser().resolve(), "📂")
+        
+        # draws external drives
+        CTkLabel(self, text="Drives", font=("Arial", 20, "bold")).pack(pady=(10, 0))
         for drive in self.drive_manager.mounted_drives:
             self.draw_item(self, Path(drive).resolve(), "💾")
 

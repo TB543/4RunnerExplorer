@@ -75,6 +75,10 @@ pip install -r resources/requirements.txt
 python src/main.py
 ```
 
+### 5. Configure mountpoints
+
+after first run src/AppData/mountpoints.json will be created. Add paths to files in your file system to be displayed in the file explorer
+
 ---
 
 ## How It Works
