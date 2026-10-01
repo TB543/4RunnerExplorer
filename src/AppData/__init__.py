@@ -1,7 +1,7 @@
 from json import load, dump
 
 
-MOUNTPOINTS = []
+MOUNTPOINTS = {}
 try:
     with open("AppData/mountpoints.json", "r") as f:
         MOUNTPOINTS = load(f)

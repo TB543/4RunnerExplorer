@@ -26,13 +26,14 @@ class FileExplorer(CTkScrollableFrame):
         self.inspector.explorer = self
         self.draw()
 
-    def draw_item(self, frame, path, item_type):
+    def draw_item(self, frame, path, item_type, display_name=None):
         """
         draws a single element to the screen
 
         :param frame: master widget to draw to
         :param path: the path of the item
         :param item_type: the emoji to represent the type of element (drive, folder or file)
+        :param display_name: the name to display for the item
         """
 
         # creates widgets
@@ -40,7 +41,9 @@ class FileExplorer(CTkScrollableFrame):
         item.path = path
         item.type = item_type
         state = CTkLabel(item, text="▶", font=("Arial", 15))
-        name = CTkLabel(item, text=f" {item_type}{path.drive if path.name == '' else path.name}", font=("Arial", 15))
+        name = path.drive if path.name == '' else path.name
+        name = display_name if display_name else name
+        name = CTkLabel(item, text=f" {item_type}{name}", font=("Arial", 15))
 
         # binds functionality
         state.bind("<Button-1>", lambda e: self.expand_volume(item))
@@ -70,8 +73,8 @@ class FileExplorer(CTkScrollableFrame):
 
         # draws mountpoints
         CTkLabel(self, text="File Explorer", font=("Arial", 20, "bold")).pack()
-        for mountpoint in MOUNTPOINTS:
-            self.draw_item(self, Path(mountpoint).expanduser().resolve(), "📂")
+        for mountpoint, name in MOUNTPOINTS.items():
+            self.draw_item(self, Path(mountpoint).expanduser().resolve(), "📂", name)
         
         # draws external drives
         CTkLabel(self, text="Drives", font=("Arial", 20, "bold")).pack(pady=(10, 0))
