@@ -74,7 +74,8 @@ class FileExplorer(CTkScrollableFrame):
         # draws mountpoints
         CTkLabel(self, text="File Explorer", font=("Arial", 20, "bold")).pack()
         for mountpoint, name in MOUNTPOINTS.items():
-            self.draw_item(self, Path(mountpoint).expanduser().resolve(), "📂", name)
+            path = Path(mountpoint).expanduser().resolve()
+            self.draw_item(self, path, "📂" if path.is_dir() else "📄", name)
         
         # draws external drives
         CTkLabel(self, text="Drives", font=("Arial", 20, "bold")).pack(pady=(10, 0))

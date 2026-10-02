@@ -152,8 +152,10 @@ class FileInspector(CTkFrame):
         """
 
         self.winfo_toplevel().withdraw()
-        FileInspector.OPEN_COMMANDS[self.path.suffix.lower()](self.path)
-        self.winfo_toplevel().deiconify()
+        try:
+            FileInspector.OPEN_COMMANDS[self.path.suffix.lower()](self.path)
+        finally:
+            self.winfo_toplevel().deiconify()
 
     def copy(self):
         """
