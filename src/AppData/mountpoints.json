@@ -1,5 +1,4 @@
 {
     "~/4RunnerEffects/src/AppData/": "4RunnerEffects",
-    "~/RetroPie/roms/wii": "Wii Games",
-    "~/RetroPie/roms/fba": "Arcade Games"
+    "~/RetroPie/roms/": "Games"
 }

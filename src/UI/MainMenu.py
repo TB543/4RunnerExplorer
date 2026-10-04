@@ -22,6 +22,7 @@ class MainMenu(CTk):
         super(MainMenu, self).__init__()
         self.drive_manager = DriveManager()
         self.geometry("1024x600+0+0")
+        self.attributes("-fullscreen", True)
         self.configure(cursor="none")
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
